@@ -1,29 +1,47 @@
-// Create a HTTP server on port 8000
-// Send plain text headers and 'Hello World' to each client
-
+var express = require('express');
 var http = require('http');
-var port = process.env.PORT || 8000;
+var path = require('path');
+var mongoose = require('mongoose');
+var request = require('request');
 
-var counter = 0;
 
-http.createServer(function (req, res) {
-  	
-  	// increment the counter for each visitor request
-  	counter=counter+1;
+var app = express();
 
-	var path = req.url;
-	console.log("requested=" + path + " counter=" + counter);
+app.configure(function(){
 
-	res.writeHead(200, {'Content-Type': 'text/html'}); // prepare response headers
+  // server port number
+  app.set('port', process.env.PORT || 5000);
 
-	if (path == "/") {
-		res.end("Hello World. You are requestor # " + counter + ".<br><a href='/page2'>Page 2</a>\n");
+  //  templates directory to 'views'
+  app.set('views', __dirname + '/views');
 
-	} else if (path == "/page2") {
-		res.end("This is page 2. <a href='/'>Back.</a>\n"); // send response and close connection	
-	}
+  // setup template engine - we're using Hogan-Express
+  app.set('view engine', 'html');
+  app.set('layout','layout');
+  app.engine('html', require('hogan-express')); // https://github.com/vol4ok/hogan-express
 
-}).listen(port);
+  app.use(express.favicon());
+  // app.use(express.logger('dev'));
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+  app.use(app.router);
+  app.use(express.static(path.join(__dirname, 'public')));
 
-// console info message
-console.log('Server running at http://127.0.0.1:' + port);
+  // database - skipping until week 5
+  app.db = mongoose.connect(process.env.MONGOLAB_URI);
+  console.log("connected to database");
+  
+});
+
+app.configure('development', function(){
+  app.use(express.errorHandler());
+});
+
+var routes = require('./routes/index.js');
+
+app.get('/', routes.index);
+
+http.createServer(app).listen(app.get('port'), function(){
+  console.log("Express server listening on port " + app.get('port'));
+});
+
