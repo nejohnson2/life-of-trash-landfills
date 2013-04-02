@@ -10,7 +10,7 @@ var moment = require("moment"); // date manipulation library
 
 //Carto Db
 var CartoDB = require('cartodb');
-var secret = require('./secret.js');
+var secret = require('../secret.js');
 var client = new CartoDB({user:secret.USER, api_key:secret.API_KEY});
 
 //var astronautModel = require("../models/astronaut.js"); //db model
