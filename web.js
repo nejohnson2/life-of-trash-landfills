@@ -3,14 +3,11 @@ var http = require('http');
 var path = require('path');
 var mongoose = require('mongoose');
 var request = require('request');
-var CartoDB = require('cartodb');
+
 
 
 //var EPA = require('./epa_echo_full.json');
 
-//Carto Db
-var secret = require('./secret.js');
-var client = new CartoDB({user:secret.USER, api_key:secret.API_KEY});
 
 var app = express();
 

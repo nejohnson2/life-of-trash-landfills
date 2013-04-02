@@ -8,6 +8,10 @@
 var request = require('request'); // library to make requests to remote urls
 var moment = require("moment"); // date manipulation library
 
+//Carto Db
+var CartoDB = require('cartodb');
+var secret = require('./secret.js');
+var client = new CartoDB({user:secret.USER, api_key:secret.API_KEY});
 
 //var astronautModel = require("../models/astronaut.js"); //db model
 
@@ -32,6 +36,8 @@ exports.cartoGet = function(req, res){
 					'</form>');	
 }
 exports.cartoPost = function(req, res) {
+
+	//+1 646-461-2530
 		
 	// get the body of the text message
 	var body = req.body.Body;
