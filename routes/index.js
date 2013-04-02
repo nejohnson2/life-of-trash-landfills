@@ -54,11 +54,12 @@ exports.cartoPost = function(req, res) {
 	var location = '{"type":"Point","coordinates":['+lon+','+lat+']}';
 
 	// send geojson values
-	client.query('INSERT INTO' + map + ' (the_geom, number) VALUES (ST_SetSRID(ST_GeomFromGeoJSON(\'' + location + '\'), 4326),\'' + from + '\');'); 
+	client.query('INSERT INTO multi_phone_track_test (the_geom, number) VALUES (ST_SetSRID(ST_GeomFromGeoJSON(\'' + location + '\'), 4326),\'' + from + '\');'); 
 
 	// catch any errors from cartodb
 	client.on('error', function(err) {
 	    console.log("some error ocurred from CartoDB");
+	    console.log(err);
 	    //console.log(err);
 	});
 
