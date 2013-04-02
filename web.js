@@ -3,7 +3,14 @@ var http = require('http');
 var path = require('path');
 var mongoose = require('mongoose');
 var request = require('request');
+var CartoDB = require('cartodb');
 
+
+//var EPA = require('./epa_echo_full.json');
+
+//Carto Db
+var secret = require('./secret.js');
+var client = new CartoDB({user:secret.USER, api_key:secret.API_KEY});
 
 var app = express();
 
@@ -40,6 +47,11 @@ app.configure('development', function(){
 var routes = require('./routes/index.js');
 
 app.get('/', routes.index);
+app.get('/carto', routes.cartoGet);
+app.post('/carto', routes.cartoPost);
+app.get('/json', routes.json);
+
+
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
