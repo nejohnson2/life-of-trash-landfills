@@ -65,4 +65,9 @@ exports.cartoPost = function(req, res) {
 
 	res.send('received post from twilio');
 	
+}
+exports.liveMapTest = function(req, res) {
+	
+	res.render('liveMapTest.html', { layout : false })	
 };
+

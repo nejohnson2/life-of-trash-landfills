@@ -46,6 +46,7 @@ var routes = require('./routes/index.js');
 app.get('/', routes.index);
 app.get('/carto', routes.cartoGet);
 app.post('/carto', routes.cartoPost);
+app.get('/liveMapTest', routes.liveMapTest);
 app.get('/json', routes.json);
 
 
