@@ -67,7 +67,18 @@ exports.cartoPost = function(req, res) {
 	
 }
 exports.liveMapTest = function(req, res) {
-	
+
 	res.render('liveMapTest.html', { layout : false })	
+}
+
+exports.json = function(req, res) {
+	
+	var some = require('../test.json');
+	console.log(some);
+	var string = JSON.stringify(some);
+	var help = JSON.parse(some);
+	console.log(help);
+	res.send('<h1>he</h1>');	
 };
+
 
