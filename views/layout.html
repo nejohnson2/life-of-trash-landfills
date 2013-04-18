@@ -50,9 +50,54 @@
     <script type="text/javascript"
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFC76iY5Mh9pupgETrXcF-DP3y57bmKME&sensor=false">
     </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
+
       function initialize() {
+	    var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+	    
+	    $.getJSON('epa_echo_full_final.json', function(data) {
+		    
+		    $.each(data, function(key, value){
+			    if(value.LRTLat != ""){
+				 /*    console.log(key + ": " + value.LRTLat + ":"+ value.LRTLon);	 */
+				    var tmpLatLng = new google.maps.LatLng(value.LRTLat,value.LRTLon);
+				    var markerIconFive = "img/markerIconFive.png";
+				    var markerIconZero = "img/markerIconZero.png";
+				    var markerIconThree = "img/markerIconThree.png";				    
+				    			    						
+					var marker = new google.maps.Marker({
+					    map: map,
+					    position: tmpLatLng,
+					    icon: markerIconZero
+					});				    
+									
+					var infowindow =  new google.maps.InfoWindow({
+					    content: ''
+					});
+					
+					var contentInfo = '<div id="content">'+
+						'<h3>' + value.Facility_Name + '</h3>' + 
+						'<div>' + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State + ", " + value.Facility_ZIP_Code + '</div>' +
+						'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +
+						/*'<li> Inspections (5yrs) : ' + value.Inspections(5yrs) + '</li>' + */
+						'<li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
+						/*'<li> Date of last formal aciont : ' + value.DateofLastFormalAction/NOVs(5yrs) + '</li>' + */
+						'<a href="/home">View Site</a>' + 
+						'</ul>'						
+					bindInfoWindow(marker, map, infowindow, contentInfo);
+/*						'<b>'+value.Facility_Name + "</b><br>" + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State +
+						'<ul><li>Days since last inspection : '+ value.DaysSinceLastInspection + '</li><li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li></ul>'
+						);*/
+
+			    } else {
+			    
+			    }
+		    });		    		    
+	    });
+    
       	if (google.loader.ClientLocation){
       		var latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
       	}
@@ -63,9 +108,28 @@
           mapTypeId: google.maps.MapTypeId.SATELLITE
         };
         var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-		document.getElementById("location").innerHTML = location;            
+
+		document.getElementById("location").innerHTML = location; 
+		
+		var marker = new google.maps.Marker({
+		  position: myLatlng,
+		  map: map,
+		  title: 'Hello World!'
+		});           
       }
-      google.maps.event.addDomListener(window, 'load', initialize);
+
+		// binds a map marker and infoWindow together on click
+		var bindInfoWindow = function(marker, map, infowindow, html) {
+		    google.maps.event.addListener(marker, 'click', function() {
+		        infowindow.setContent(html);
+		        infowindow.open(map, marker);	    
+		    });
+		}
+	
+		google.maps.event.addDomListener(window, 'load', initialize);
+
+
+
     </script>
   </head>
   <body>
