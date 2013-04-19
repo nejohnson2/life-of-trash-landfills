@@ -1,0 +1,68 @@
+
+/* CSS FOR MAP  */
+/*
+
+# = id
+. = class
+
+*/
+
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background:white;
+}
+
+#map-canvas { 
+	height: 100%;
+	width: 100%;
+	top: 50px;
+}
+
+/* This fixes bug with bootstrap */
+#map-canvas img {
+	max-width: none;
+}
+#sidebar.home {
+    background: #FFF;
+    opacity: 0.9;
+    position: absolute;
+    top: 0;
+    bottom:0;
+    left:0;
+    top: 50px;
+    margin-left: 0;
+    z-index: 1;
+}
+
+#sidebar {
+	position: absolute;
+}
+#sidebar ul{
+    list-style-type: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    margin:0;
+}
+
+#sidebar ul li {
+    padding: 1em .7em;
+}
+#sidebar.home ul li p{
+    padding: 0;
+}
+#sidebar li h2 {
+    font-family: 'Exo', Arial, sans-serif;
+}
+#sidebar ul li a{
+    color: #111111;
+    text-decoration: none;
+}
+
+#sidebar ul li:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+    cursor: hand;
+}

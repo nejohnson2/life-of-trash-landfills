@@ -1,157 +1,140 @@
+var map;
+var chicago = new google.maps.LatLng(41.850033, -87.6500523);
+
 jQuery(document).ready(function() {
+	initialize();
+	getTopTen();
 
+});
 
-   
-    
-    geocoder = new google.maps.Geocoder();
+function initialize() {
 
-    if ( $('#mapHome')[0] ){
-        initializeHomeMap();
-        getPosition();
-        getTodaysEvents();
-    }
-    if ( $("#mapEvent")[0] ){
-        initializeOneMap();
-    }
-    
-    
-    infowindow= new google.maps.InfoWindow({
-        maxWidth: 200
-    });
+	$.getJSON('epa_echo_full_final.json', function(data) {
+	    
+	    $.each(data, function(key, value){
+		    if(value.LRTLat != ""){
+		    
+			    var tmpLatLng = new google.maps.LatLng(value.LRTLat, value.LRTLon);
+			    var markerIconFive = "img/markerIconFive.png";
+			    var markerIconZero = "img/markerIconZero.png";				    
 
-    $(".momentFromNow").each(function(){
-        $(this).html(moment(new Date($(this).html())).fromNow());
-    });
-    $(".convertToMoment").each(function(){
-        //var newdate = moment(new Date($(this).html()));
-        //newdate.format("dddd, MMMM Do YYYY, h:mm a");
-        $(this).html(moment(new Date($(this).html())).calendar());
-        
-    });
-    
-    //init modal window for event info
-    jQuery("#myModal").dialog({
-		autoOpen: false,
-		show: "blind",
-		hide: "blind",
-		height: 240,
-		modal: true
+				var marker = new google.maps.Marker({
+				    map: map,
+				    position: tmpLatLng,
+				    icon: markerIconZero
+				});											
+						
+				var infowindow =  new google.maps.InfoWindow({
+				    content: ''
+				});
+				
+				var contentInfo = '<div id="content">'+
+					'<h3>' + value.Facility_Name + '</h3>' + 
+					'<div>' + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State + ", " + value.Facility_ZIP_Code + '</div>' +
+					'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +
+
+					'<li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
+
+					'<a href="/home">View Site</a>' + 
+					'</ul>'						
+				bindInfoWindow(marker, map, infowindow, contentInfo);
+				
+		    } 
+	    });		    		    
 	});
 
-            jQuery('#eventName').change(function(e){
-                var currentTitle = jQuery(this).val();
-                jQuery("#urlslug").val(convertToSlug(currentTitle));
 
-            });
+	// Get LatLng for users via browser
+	if (google.loader.ClientLocation){
+		var latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
+	} else {
+		var latlng = new google.maps.LatLng(41.850033, -87.6500523); //chicago 
+	}
+	
+	var mapOptions = {
+	  center: latlng,
+	  zoom: 12,
+	  mapTypeId: google.maps.MapTypeId.SATELLITE
+	};
+	
+	var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+	
+	//display location in html
+	//document.getElementById("location").innerHTML = location; 
+	
+} //end initaile function
 
-}); //end document ready
-
-
-//initialize the map on the home page
-function initializeHomeMap() {
-    console.log("Starting map");
-    //setup map
-    
-    var mapstyles = [
-	  {
-	    featureType: "road",
-	    elementType: "geometry.fill",
-	    stylers: [
-	      { visibility: "off" },
-	      { color: "#ebeeca" },
-	      { weight: 2.4 }
-	    ]
-	  },{
-	    elementType: "labels.text.stroke",
-	    stylers: [
-	      { visibility: "simplified" }
-	    ]
-	  },{
-	    featureType: "road.highway",
-	    elementType: "geometry",
-	    stylers: [
-	      { visibility: "simplified" }
-	    ]
-	  },{
-	    featureType: "water",
-	    stylers: [
-	      { visibility: "simplified" },
-	      { color: "#6dc6d5" }
-	    ]
-	  },{
-	    elementType: "geometry.fill",
-	  }
-	];
-
-	var styledMap = new google.maps.StyledMapType(mapstyles,
-    {name: "Styled Map"});
-    
-    
-    var myOptions = {
-          center: new google.maps.LatLng(40.7746431, -73.9701962),
-          zoom: 12,
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-          mapTypeControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_TOP
-        },
-      panControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_TOP
-      },
-      zoomControl: true,
-      zoomControlOptions: {
-          style: google.maps.ZoomControlStyle.LARGE,
-          position: google.maps.ControlPosition.RIGHT_TOP
-      },
-      scaleControl: true,
-      scaleControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_TOP
-      },
-      streetViewControl: true,
-      streetViewControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_TOP
-      }
-    };
-    map = new google.maps.Map(document.getElementById("mapHome"), myOptions);
-     map.mapTypes.set('map_style', styledMap);
-     map.setMapTypeId('map_style');
-    markers = [];
-    
-    youAreHereMarker = new google.maps.Marker({
-        map: map,
-        icon: "img/marker_purple.png"
+// binds a map marker and infoWindow together on click
+var bindInfoWindow = function(marker, map, infowindow, html) {
+    google.maps.event.addListener(marker, 'click', function() {
+        infowindow.setContent(html);
+        infowindow.open(map, marker);	    
     });
-    
 }
 
-function getPosition(){
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(function(currentPosition) {
-      console.log("getting position");
-      console.log(currentPosition);
-      currentLat = currentPosition.coords.latitude;
-      currentLong = currentPosition.coords.longitude;
-      currentPos = currentLat+","+currentLong;
-      //var targetLoc = localStorage.getItem("targetLoc");
-      localStorage.setItem("yourLocation", currentPos);
+/* google.maps.event.addDomListener(window, 'load', initialize); */
 
-      youAreHereMarker.setPosition(new google.maps.LatLng(currentPosition.coords.latitude,currentPosition.coords.longitude));
-      
-    //add onclick event listener for the markers
-    google.maps.event.addListener(youAreHereMarker, 'click', function(){
-        infowindow.open(map);
-        infowindow.setContent("This is you!");
-        infowindow.setPosition(youAreHereMarker.position);
-    });
-      map.panTo(youAreHereMarker.position);
+function getTopTen(){
 
-        
-      
-    }, function(error){
-      alert("Error occurred when watching. Error code: " + error);
-    
-    }, {enableHighAccuracy:true, maximumAge:30000, timeout:27000});
+	// Get LatLng for users via browser
+	if (google.loader.ClientLocation){
+		var latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
+	} else {
+		var latlng = new google.maps.LatLng(41.850033, -87.6500523); //chicago 
+	}
+
+
+	/* FIX BUG
+		 toString adds in parenthasis which cause problems while caluclating!!!! 
+	*/
+
+	var currentPos = latlng.toString();
+	currentPos = currentPos.replace("(","");
+	currentPos = currentPos.replace(")","");
+	console.log(currentPos);	
+	
+	if (currentPos != null){
+	    currentPos = currentPos.split(",");
+	    $.getJSON('epa_echo_full_final.json', function(data) {
+	    
+		    $.each(data, function(key, value){
+			    if(value.LRTLat != ""){
+				    var text = calculateDistance(currentPos[0], currentPos[1], value.LRTLat, value.LRTLon)+"mi";
+				    console.log("text; " + text);
+    		    } 
+		    });		    		    
+		});
+	}else{
+//	    var text = "";
+	}
+	
+}
+
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = (lat2-lat1).toRad();
+  console.log("dLAT = "+dLat);
+
+  /* Converts numeric degrees to radians */	  
+  if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+    }
   }
-  else {
-    Alert('Geolocation is not supported for this Browser/OS version yet.');
+  
+  var dLon = (lon2-lon1).toRad();
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos((lat1* Math.PI / 180).toRad()) * Math.cos((lat2* Math.PI / 180).toRad()) *
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var d = R * c * 0.621371192;// km to mi
+  
+  return d.toFixed(1);
+}
+/** Converts numeric degrees to radians */
+if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
   }
-};
+}
