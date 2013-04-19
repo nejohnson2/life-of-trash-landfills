@@ -1,6 +1,7 @@
 var map;
 var chicago = new google.maps.LatLng(41.850033, -87.6500523);
 var topTen = [];
+var markers = [];
 
 jQuery(document).ready(function() {
 	initialize();
@@ -17,13 +18,23 @@ function initialize() {
 		    
 			    var tmpLatLng = new google.maps.LatLng(value.LRTLat, value.LRTLon);
 			    var markerIconFive = "img/markerIconFive.png";
-			    var markerIconZero = "img/markerIconZero.png";				    
-
+//			    var markerIconZero = "img/markerIconZero.png";				    
+			    var markerIconZero = "img/markerIconWhite.png";
+			    
+			    var thisId = value.NAICS;
+			    
 				var marker = new google.maps.Marker({
 				    map: map,
 				    position: tmpLatLng,
+				    title: thisId,
 				    icon: markerIconZero
-				});											
+				});		
+        
+                var newObj = {
+	                id: thisId,
+	                marker: marker
+                }       
+                markers.push(newObj);													
 						
 				var infowindow =  new google.maps.InfoWindow({
 				    content: ''
@@ -56,15 +67,19 @@ function initialize() {
 	} else {
 		var latlng = new google.maps.LatLng(41.850033, -87.6500523); //chicago 
 	}
-	
+    	
 	var mapOptions = {
-	  center: latlng,
-	  zoom: 12,
-	  mapTypeId: google.maps.MapTypeId.SATELLITE
+	  	center: latlng,
+	  	zoom: 12,
+		disableDefaultUI: true,
+		panControl: false,
+		zoomControl: false,
+		mapTypeControl: false,
+		mapTypeId: google.maps.MapTypeId.SATELLITE
 	};
-	
+
 	var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-	
+
 	//display location in html
 	//document.getElementById("location").innerHTML = location; 
 	
@@ -107,7 +122,7 @@ function getTopTen(){
 		    $.each(data, function(key, value){
 			    if(value.LRTLat != "" && value.Facility_Name != ""){
 				    var text = calculateDistance(currentPos[0], currentPos[1], value.LRTLat, value.LRTLon);				    
-				    topTen.push({ dist: Number(text), name: value.Facility_Name, cco: value.CAAOperatingStatus});				    				 		    
+				    topTen.push({ dist: Number(text), name: value.Facility_Name, cco: value.CAAOperatingStatus, id: value.NAICS });				    				 		    
     		    } 
 		    });		 
 
@@ -122,7 +137,7 @@ function getTopTen(){
 			
 			for(i = 0; i < topTen.length; i++){
 				console.log(i);
-				var landfillHTML = "<li><p><strong>" + topTen[i].name + "</p></strong><p>" + 
+				var landfillHTML = "<li landfill_id=\"" + topTen[i].id + "\"><p><strong>" + topTen[i].name + "</p></strong><p>" + 
 					topTen[i].dist + "mi" + " - " + 
 					topTen[i].cco + "</li>" + landfillHTML;			
 
@@ -131,26 +146,37 @@ function getTopTen(){
 			$(".loading").remove();
 			$("#today-events").html(landfillHTML);
 
-		    $("#today-events li").live('mouseover', function(){
-		        var thisId = $(this).attr("event-id");
-		        
+/*
+			$("#today-events li").mouseover(function(){
+				//console.log('test');
+				  //whichID = marker.open()
+				  
+		          infowindow.open(map, marker);
+				
+				}
+			);
+*/
+			
+		    $("#today-events li").on('mouseover', function(){
+			    console.log('test');
+			    			    
+		        var thisId = $(this).attr("landfill_id"); // get id from sidebar
+		        console.log(thisId);
+/*
 		        for (a = 0; a < markers.length; a++){
 		            var thisMarker = markers[a].marker;
-		            var latLng = new google.maps.LatLng(markers[a].lat, markers[a].lng);
-		             
+		            console.log(thisMarker.id);
+		        //    var latLng = new google.maps.LatLng(markers[a].lat, markers[a].lng)		        
+	
 		            if (thisMarker.title == thisId){
-		                for(b=0;b<markers.length; b++){
-		                  //  markers[b].infowindow.close();
-		                }
-		                if (map.getBounds().contains(latLng) == false){
-		                    map.panTo(latLng);
-		                }
+			            console.log("equals");
 		                thisMarker.setAnimation(google.maps.Animation.BOUNCE);
 		            } else{
 		                thisMarker.setAnimation(null);
 		            }
+
 		        }
-		        
+*/
 		    });
 		    
 		    
