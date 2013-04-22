@@ -2,93 +2,28 @@ var map;
 var chicago = new google.maps.LatLng(41.850033, -87.6500523);
 var topTen = [];
 var markers = [];
+var latlng;  //browswers lat lon
+
+var markerIconZero = "img/markerIconWhite.png";
 
 jQuery(document).ready(function() {
-	initialize();
-	getTopTen();
-
-});
-
-function initialize() {
-
-	$.getJSON('epa_echo_full_final.json', function(data) {
-	    
-	    $.each(data, function(key, value){
-		    if(value.LRTLat != ""){
-		    
-			    var tmpLatLng = new google.maps.LatLng(value.LRTLat, value.LRTLon);
-			    var markerIconFive = "img/markerIconFive.png";
-//			    var markerIconZero = "img/markerIconZero.png";				    
-			    var markerIconZero = "img/markerIconWhite.png";
-			    
-			    var thisId = value.NAICS;
-			    
-				var marker = new google.maps.Marker({
-				    map: map,
-				    position: tmpLatLng,
-				    title: thisId,
-				    icon: markerIconZero
-				});		
-        
-                var newObj = {
-	                id: thisId,
-	                marker: marker
-                }       
-                markers.push(newObj);													
-						
-				var infowindow =  new google.maps.InfoWindow({
-				    content: ''
-				});
-				
-				var contentInfo = '<div id="content">'+
-					'<h3>' + value.Facility_Name + '</h3>' + 
-					'<div>' + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State + ", " + value.Facility_ZIP_Code + '</div>' +
-					'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +
-
-					'<li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
-
-					'<a href="/home">View Site</a>' + 
-					'</ul>'						
-				bindInfoWindow(marker, map, infowindow, contentInfo);
-
-			    //remove markers when you click elsewhere
-			    google.maps.event.addListener(map, 'click', function(){
-			        infowindow.close();
-			    });
-				
-		    } 
-	    });		    		    
-	});
-
+	$("#sidebar").hide();	
 
 	// Get LatLng for users via browser
 	if (google.loader.ClientLocation){
-		var latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
+		latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
 	} else {
-		var latlng = new google.maps.LatLng(41.850033, -87.6500523); //chicago 
+		alert("Where are you?  Can't find you location.")
+		latlng = new google.maps.LatLng(41.850033, -87.6500523); //chicago 
 	}
-    	
-	var mapOptions = {
-	  	center: latlng,
-	  	zoom: 12,
-		disableDefaultUI: true,
-		panControl: false,
-		zoomControl: false,
-		mapTypeControl: false,
-		mapTypeId: google.maps.MapTypeId.SATELLITE
-	};
-
-	var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-
-	//display location in html
-	//document.getElementById("location").innerHTML = location; 
 	
-	
-} //end initaile function
+	drawMap();
+
+});
 
 // binds a map marker and infoWindow together on click
 var bindInfoWindow = function(marker, map, infowindow, html) {
-    
+
     //remove markers when you click elsewhere
     google.maps.event.addListener(marker, 'click', function(){
         infowindow.close();
@@ -100,93 +35,167 @@ var bindInfoWindow = function(marker, map, infowindow, html) {
 
 }
 
-/* google.maps.event.addDomListener(window, 'load', initialize); */
+function drawMap(){
 
-function getTopTen(){
+	var mapOptions = {
+	  	center: latlng,
+	  	zoom: 12,
+		disableDefaultUI: true,
+		panControl: false,
+		zoomControl: false,
+		mapTypeControl: false,
+		mapTypeId: google.maps.MapTypeId.SATELLITE
+	};
 
-	// Get LatLng for users via browser
-	if (google.loader.ClientLocation){
-		var latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
-	} else {
-		var latlng = new google.maps.LatLng(41.850033, -87.6500523); //chicago 
-	}
+	map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);	
+	
+}
 
+
+function searchLandfills(){
+	var results = [];
+
+	var something = $("#formSearch").val();
+
+	var patt = new RegExp(something, "gi");
+
+    //caluculate distance to landfills
 	var currentPos = latlng.toString();
 	currentPos = currentPos.replace("(","");
 	currentPos = currentPos.replace(")","");
-	
-	if (currentPos != null){
-	    currentPos = currentPos.split(",");
-	    $.getJSON('epa_echo_full_final.json', function(data) {
+	currentPos = currentPos.split(",");
+	console.log(currentPos);
+		
+    $.getJSON('epa.json', function(data) {
 	    
-		    $.each(data, function(key, value){
-			    if(value.LRTLat != "" && value.Facility_Name != ""){
-				    var text = calculateDistance(currentPos[0], currentPos[1], value.LRTLat, value.LRTLon);				    
-				    topTen.push({ dist: Number(text), name: value.Facility_Name, cco: value.CAAOperatingStatus, id: value.NAICS });				    				 		    
-    		    } 
-		    });		 
+	    $.each(data, function(key, value){
 
-		    topTen.sort(function(a, b) {
-			    return a["dist"] - b["dist"];
-			});	
+		    if(patt.test(value.Facility_Name) == true  && value.LRT != ""){
+    
+		    	// check for latlng and calculate distance 
+			    if(value.LRTLat != ""){
+				    var dist = calculateDistance(currentPos[0], currentPos[1], value.LRTLat, value.LRTLon);				    
+    		    } 		        		    
 
-			topTen = topTen.slice(0,10);
-			topTen = topTen.reverse();
-			
-			console.log(topTen.length);
-			
-			for(i = 0; i < topTen.length; i++){
-				console.log(i);
-				var landfillHTML = "<li landfill_id=\"" + topTen[i].id + "\"><p><strong>" + topTen[i].name + "</p></strong><p>" + 
-					topTen[i].dist + "mi" + " - " + 
-					topTen[i].cco + "</li>" + landfillHTML;			
-
-			}
-			
-			$(".loading").remove();
-			$("#today-events").html(landfillHTML);
-
-/*
-			$("#today-events li").mouseover(function(){
-				//console.log('test');
-				  //whichID = marker.open()
-				  
-		          infowindow.open(map, marker);
+	    	    var tmpLatLng = new google.maps.LatLng(value.LRTLat, value.LRTLon);
+					
+				//create landfill marker	
+				var marker = new google.maps.Marker({
+				    map: map,
+				    position: tmpLatLng,
+				    title: value.UniqueID,
+				    animation: google.maps.Animation.DROP,
+				    icon: markerIconZero
+				});	
 				
-				}
-			);
-*/
-			
-		    $("#today-events li").on('mouseover', function(){
-			    console.log('test');
-			    			    
-		        var thisId = $(this).attr("landfill_id"); // get id from sidebar
-		        console.log(thisId);
-/*
-		        for (a = 0; a < markers.length; a++){
-		            var thisMarker = markers[a].marker;
-		            console.log(thisMarker.id);
-		        //    var latLng = new google.maps.LatLng(markers[a].lat, markers[a].lng)		        
-	
-		            if (thisMarker.title == thisId){
-			            console.log("equals");
-		                thisMarker.setAnimation(google.maps.Animation.BOUNCE);
-		            } else{
-		                thisMarker.setAnimation(null);
-		            }
+				
+				var infowindow =  new google.maps.InfoWindow({
+					content: ''
+				});
+				
+				var contentInfo = '<div id="content">'+
+					'<h3>' + value.Facility_Name + '</h3>' + 
+					'<div>' + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State + ", " + value.Facility_ZIP_Code + '</div>' +
+					'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +
+					
+					'<li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
+					
+					'<a href="/home">View Site</a>' + 
+					'</ul>'	
+					
+					
+				bindInfoWindow(marker, map, infowindow, contentInfo);		
+				
+				var result = {
+			    	value : value,
+			    	dist : Number(dist),
+			    	marker : marker
+		    	};
+		    	
+		    	results.push(result);	
+			    
+			    //remove markers when you click elsewhere
+			    google.maps.event.addListener(map, 'click', function(){
+			        infowindow.close();
+			    });			    
+		    }
+		    
+	    });
+	    
+	    /********************  Sidebar HTML  **************************/
+	    //sort the top ten and put closest on top
+	    results.sort(function(a, b) {
+		    return a["dist"] - b["dist"];
+		});	
 
-		        }
-*/
-		    });
-		    
-		    
-		    
-		});
-	}else{
-	    alert("Where are you?  Can't find you location.")
-	}
+		results = results.reverse();	
 	
+		for(i = 0; i < results.length; i++){
+
+			//create html for sidebar
+			var active = ""
+			if(results[i].value.CAAOperatingStatus != "active"){ active = "inactive"; }else{ active = results[i].value.CAAOperatingStatus; }
+			
+			var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
+				results[i].dist + "mi" + " - " + 
+				active + "</li>" + landfillHTML;			
+		}
+		
+		$(".loading").remove();
+		$("#landfill-locations").html(landfillHTML);	
+		
+		
+	    /********************  Bounce Animation  **************************/		
+		
+		$("#landfill-locations li").on('mouseover', function(){
+			
+		    var thisId = $(this).attr("landfill_id"); // get id from sidebar
+		    
+		    for(a = 0; a < results.length; a++){
+		        var thisMarker = results[a].marker
+		        var latLng = new google.maps.LatLng(results[a].value.LRTLat, results[a].value.LRTLon);		        
+		
+		        if(thisMarker.title == thisId){
+			        thisMarker.setAnimation(google.maps.Animation.BOUNCE);
+		        } else{
+			        thisMarker.setAnimation(null);
+		        }
+		        
+		        
+		    }
+		});		
+
+		
+
+	    /********************  Zoom Animation  **************************/	
+		
+		$("#landfill-locations li").on('click', function(){
+	        var thisId = $(this).attr("landfill_id"); // get id from sidebar
+	        
+	        for(a = 0; a < results.length; a++){
+		        var thisMarker = results[a].marker
+		        var latLng = new google.maps.LatLng(results[a].value.LRTLat, results[a].value.LRTLon);		        
+
+		        if(thisMarker.title == thisId){
+	                if (map.getBounds().contains(latLng) == false){
+	                    map.panTo(latLng);
+	                }
+			        thisMarker.setAnimation(google.maps.Animation.BOUNCE);
+		        } else{
+			        thisMarker.setAnimation(null);
+		        }	
+		    }		    			    
+
+		});
+		$("#sidebar").show();	
+	    
+    	var landfill_length = "<p>" + results.length + "</p>";	    	
+		$("#landfill_length").html(landfill_length);
+
+	});
+
 }
+	    /********************  Location Math  **************************/	
 
 // calculate distance from current locaion 
 function calculateDistance(lat1, lon1, lat2, lon2) {
