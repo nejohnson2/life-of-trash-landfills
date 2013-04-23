@@ -20,23 +20,25 @@
 	<div class="navbar navbar-inverse navbar-fixed-top">
 	      <div class="navbar-inner">
 	        <div class="container-fluid">
+
+
+
+		      <div class="nav-collapse collapse">
+				<ul class="nav">
+				  <li class="active"><a>Landfills found:</a></li>
+  				  <li class="active"><a href="#" id="landfill_length"></a></li>
+				</ul>
 <!--
-	          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-	            <span class="icon-bar"></span>
-	            <span class="icon-bar"></span>
-	            <span class="icon-bar"></span>
-	          </button>
+		          <button type="button" class="btn" data-toggle="collapse" data-target="#sidebar">
+			          Show/Hide List
+	  			  </button>
 -->
 
-	          <a class="brand" onclick="showSidebar()">  Show List  </a>
-	          <a class="brand" onclick="hideSidebar()">  Hide List  </a>
-	          <div class="nav-collapse collapse">
-
+<!-- 	  			<p id="landfill_length"> </p> -->
+	  			
 				<div class="navbar-form pull-right">
-<!-- 	            <form class="navbar-form pull-right"> -->
 	              <input id="formSearch" class="span2" type="text" placeholder="Landfills...">
 	              <button type="submit" class="btn" onclick="searchLandfills()">Search</button>
-<!-- 	            </form> -->
 				</div>
 	          </div><!--/.nav-collapse -->
 	        </div>

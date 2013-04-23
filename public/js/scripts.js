@@ -7,7 +7,8 @@ var latlng;  //browswers lat lon
 var markerIconZero = "img/markerIconWhite.png";
 
 jQuery(document).ready(function() {
-	$("#sidebar").hide();	
+/* 	$("#sidebar").hide();	 */
+	$(".collapse").collapse()
 
 	// Get LatLng for users via browser
 	if (google.loader.ClientLocation){
@@ -63,6 +64,7 @@ function searchLandfills(){
 	var results = [];
 
 	var something = $("#formSearch").val();
+	map.setZoom(4)
 
 	var patt = new RegExp(something, "gi");
 
@@ -134,8 +136,13 @@ function searchLandfills(){
 	    results.sort(function(a, b) {
 		    return a["dist"] - b["dist"];
 		});	
+		
+		var foo = results[results.length - 1];
+		console.log(foo);		
 
-		results = results.reverse();	
+		results = results.reverse();
+		
+			
 	
 		for(i = 0; i < results.length; i++){
 
@@ -143,9 +150,15 @@ function searchLandfills(){
 			var active = ""
 			if(results[i].value.CAAOperatingStatus != "active"){ active = "inactive"; }else{ active = results[i].value.CAAOperatingStatus; }
 			
-			var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
+			if(landfillHTML == ""){
+				var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
 				results[i].dist + "mi" + " - " + 
-				active + "</li>" + landfillHTML;			
+				active + "</li>";
+			} else {
+				var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
+				results[i].dist + "mi" + " - " + 
+				active + "</li>" + landfillHTML;
+			}		
 		}
 		
 		$(".loading").remove();
@@ -172,6 +185,16 @@ function searchLandfills(){
 		    }
 		});		
 
+
+/*
+		$("#landfill-locations li").on('click', function(){
+
+			  var thisId = $(this).attr("landfill_id");
+			  thisid.addclass(active);
+
+		});
+*/
+
 		
 
 	    /********************  Zoom Animation  **************************/	
@@ -195,7 +218,7 @@ function searchLandfills(){
 		    }		    			    
 
 		});
-		$("#sidebar").show();	
+/* 		$("#sidebar").show();	 */
 	    
     	var landfill_length = "<p>" + results.length + "</p>";	    	
 		$("#landfill_length").html(landfill_length);
@@ -276,6 +299,7 @@ function drawEverything(){
 		results = results.slice(0,50);
 		results = results.reverse();	
 		
+		var landfillHTML = "";
 	
 		for(i = 0; i < results.length; i++){
 
@@ -283,9 +307,18 @@ function drawEverything(){
 			var active = ""
 			if(results[i].value.CAAOperatingStatus != "active"){ active = "inactive"; }else{ active = results[i].value.CAAOperatingStatus; }
 			
-			var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
+	
+				
+			if(landfillHTML == ""){
+				var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
 				results[i].dist + "mi" + " - " + 
-				active + "</li>" + landfillHTML;			
+				active + "</li>";
+			} else {
+				var landfillHTML = "<li landfill_id=\"" + results[i].value.UniqueID + "\"><p><strong>" + results[i].value.Facility_Name + "</p></strong><p>" + 
+				results[i].dist + "mi" + " - " + 
+				active + "</li>" + landfillHTML;
+			}
+						
 		}
 		
 		$(".loading").remove();
@@ -334,9 +367,9 @@ function drawEverything(){
 		    }		    			    
 
 		});
-		$("#sidebar").show();	
+/* 		$("#sidebar").show();	 */
 	    
-    	var landfill_length = "<p>" + results.length + "</p>";	    	
+    	var landfill_length = "<li>" + results.length + "</li>";	    	
 		$("#landfill_length").html(landfill_length);
 
 	});
