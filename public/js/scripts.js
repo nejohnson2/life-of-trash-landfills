@@ -137,9 +137,9 @@ function searchLandfills(){
 		    return a["dist"] - b["dist"];
 		});	
 		
-		var foo = results[results.length - 1];
-		console.log(foo);		
-
+//		var foo = results[results.length - 1];
+//		console.log(foo);		
+//		map.fitBounds()
 		results = results.reverse();
 		
 			
@@ -207,9 +207,8 @@ function searchLandfills(){
 		        var latLng = new google.maps.LatLng(results[a].value.LRTLat, results[a].value.LRTLon);		        
 
 		        if(thisMarker.title == thisId){
-
-	                    map.panTo(latLng);
-	                    map.setZoom(15)
+                    map.panTo(latLng);
+                    map.setZoom(15)
 
 			        thisMarker.setAnimation(google.maps.Animation.BOUNCE);
 		        } else{
@@ -336,6 +335,7 @@ function drawEverything(){
 		        var latLng = new google.maps.LatLng(results[a].value.LRTLat, results[a].value.LRTLon);		        
 		
 		        if(thisMarker.title == thisId){
+
 			        thisMarker.setAnimation(google.maps.Animation.BOUNCE);
 		        } else{
 			        thisMarker.setAnimation(null);
@@ -357,9 +357,8 @@ function drawEverything(){
 		        var latLng = new google.maps.LatLng(results[a].value.LRTLat, results[a].value.LRTLon);		        
 
 		        if(thisMarker.title == thisId){
-	                if (map.getBounds().contains(latLng) == false){
-	                    map.panTo(latLng);
-	                }
+		            map.panTo(latLng);
+                    map.setZoom(15)
 			        thisMarker.setAnimation(google.maps.Animation.BOUNCE);
 		        } else{
 			        thisMarker.setAnimation(null);
