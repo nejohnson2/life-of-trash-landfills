@@ -10,6 +10,9 @@ jQuery(document).ready(function() {
 /* 	$("#sidebar").hide();	 */
 	$(".collapse").collapse()
 
+	getModal();
+	
+
 	// Get LatLng for users via browser
 	if (google.loader.ClientLocation){
 		latlng = new google.maps.LatLng(google.loader.ClientLocation.latitude, google.loader.ClientLocation.longitude);
@@ -22,12 +25,15 @@ jQuery(document).ready(function() {
 	drawEverything();
 
 });
+
+
 function hideSidebar(){
 	$("#sidebar").hide();
 }
 function showSidebar(){
 	$("#sidebar").show();
 }
+
 // binds a map marker and infoWindow together on click
 var bindInfoWindow = function(marker, map, infowindow, html) {
 
@@ -105,14 +111,17 @@ function searchLandfills(){
 				var contentInfo = '<div id="content">'+
 					'<h3>' + value.Facility_Name + '</h3>' + 
 					'<div>' + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State + ", " + value.Facility_ZIP_Code + '</div>' +
-					'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +
-					
-					'<li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
-					
-					'<a href="/home">View Site</a>' + 
+					'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +					
+					'<li>Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
+					'<li>Percent Minority(3 mile radius) : ' + value.PercentMinority_3mileradius + '</li>' + 
+/*
+					'<a href="#myModal' + value.UniqueID + '" role="button" class="btn" data-toggle="modal">Launch demo modal</a>' +
+					'<button type="button" data-toggle="modal" data-target="#myModal'+value.UniqueID+'">Launch modal</button>'+
+*/
 					'</ul>'	
 					
-					
+
+				
 				bindInfoWindow(marker, map, infowindow, contentInfo);		
 				
 				var result = {
@@ -263,10 +272,10 @@ function drawEverything(){
 					'<h3>' + value.Facility_Name + '</h3>' + 
 					'<div>' + value.Facility_Street + " " + value.Facility_City + ", " + value.Facility_State + ", " + value.Facility_ZIP_Code + '</div>' +
 					'<ul><li>Days since last inspection : ' + value.DaysSinceLastInspection + '</li>' +
-					
 					'<li> Alleged significat violations : ' + value.AllegedCurrentSignificantViolations + '</li>' +
-					
-					'<a href="/home">View Site</a>' + 
+					'<li>Percent Minority(3 mile radius) : ' + value.PercentMinority_3mileradius + '</li>' + 
+					'<a href="#myModal' + value.UniqueID + '" role="button" class="btn" data-toggle="modal">Launch demo modal</a>' +
+/* 					'<button type="button" data-toggle="modal" data-target="#myModal'+value.UniqueID+'">Launch modal</button>'+ */
 					'</ul>'	
 					
 					
